@@ -1,6 +1,8 @@
 /* TODO :
-    - button stays pressed while modification is shown
+    - handle versions
 */
+
+var initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
 
 $(document).ready(function() {
 
@@ -26,7 +28,7 @@ $(document).ready(function() {
         // unactivate other active buttons
         $("button.active").removeClass("active");
         $(this).addClass("active");
-        //$("#text textarea").val(localStorage["text" + i] || "Erreur.");
+
         var texti = localStorage["text" + i];
         if (typeof(texti) !== "undefined") {
           var diffs = dmp.diff_main(localStorage.text, texti);
@@ -56,7 +58,7 @@ $(document).ready(function() {
 
   // Show initial text
   var showText = function() {
-    text.html("<textarea>" + (localStorage.text || "Rien n'a encore été écrit.") + "</textarea>");
+    text.html("<textarea>" + (localStorage.text || initialInfo) + "</textarea>");
   };
   showText();
 
