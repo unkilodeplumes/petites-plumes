@@ -1,0 +1,48 @@
+html {
+  height: 95%;
+  margin: auto;
+}
+
+body {
+  height: calc(100% - 20px);
+}
+
+#text {
+  float: left;
+  width: calc(57% - 20px);
+  height: inherit;
+}
+
+#text > textarea, #text > p {
+  margin: 0;
+  border: solid #ccc;
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+  background-color: #eee;
+  font-family: cursive;
+}
+
+#edits {
+  float: right;
+  width: calc(39% - 20px);
+  height: inherit;
+  padding: 10px;
+  background-color: #ddd;
+  border: solid #eee;
+  font-family: monospace;
+}
+
+#edits button {
+  font-family: inherit;
+}
+
+#propose {
+  width: 50%;
+  margin-left: 25%;
+  margin-bottom: 10px;
+}
+
+button.active {
+  border-style: inset;
+}
