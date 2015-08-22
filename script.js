@@ -2,11 +2,69 @@
     - handle versions
 */
 
-var initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
+"use strict"
+
+// localStorage getters and setters
+var store = function() {
+  // local attributes
+  var editNb;
+  var initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
+
+  var getEditNb = function() {
+    if (typeof(editNb) === "undefined") {
+      editNb = localStorage.editNb || 0;
+    };
+    return editNb;
+  };
+
+  var getEditName = function(i) {
+    return localStorage["editName" + i];
+  };
+
+  var getEditText = function(i) {
+    return localStorage["editText" + i];
+  };
+
+  var getText = function() {
+    return localStorage.text || initialInfo;
+  };
+
+  var incrEditNb = function() {
+    editNb = getEditNb() + 1;
+    localStorage.editNb = editNb;
+  };
+
+  var setEditText = function(value) {
+    localStorage["editText" + getEditNb()] = value;
+  };
+
+  var setEditName = function(value) {
+    localStorage["editName" + getEditNb()] = value;
+  };
+
+  var setText = function(value) {
+    localStorage.text = value;
+  };
+
+  var clear = function() {
+    localStorage.clear();
+  };
+
+  return {
+    getEditNb: getEditNb,
+    getEditName: getEditName,
+    getEditText: getEditText,
+    getText: getText,
+    incrEditNb: incrEditNb,
+    setEditText: setEditText,
+    setEditName: setEditName,
+    setText: setText,
+    clear: clear
+  };
+}();
 
 $(document).ready(function() {
 
-  var editNb = localStorage.editNb || 0;
   var text = $("#text");
   var edits = $("#edits");
 
@@ -14,7 +72,7 @@ $(document).ready(function() {
   var dmp = new diff_match_patch();
 
   var showEdit = function(i) {
-    edits.append("<p><button id='edit" + i + "'>" + localStorage["editName" + i] + "</button></p>");
+    edits.append("<p><button id='edit" + i + "'>" + store.getEditName(i) + "</button></p>");
     $("#edit" + i).click(function() {
       // active -> unactive / unactive -> active
 
@@ -29,45 +87,44 @@ $(document).ready(function() {
         $("button.active").removeClass("active");
         $(this).addClass("active");
 
-        var texti = localStorage["text" + i];
+        var texti = store.getEditText(i);
         if (typeof(texti) !== "undefined") {
-          var diffs = dmp.diff_main(localStorage.text, texti);
+          var diffs = dmp.diff_main(store.getText(), texti);
           dmp.diff_cleanupSemantic(diffs);
           var html = dmp.diff_prettyHtml(diffs);
           text.html("<p>" + html  + "</p>");
         }
         else {
-          text.html("Erreur !");
+          text.html("<p>Erreur !</p>");
         }
       }
     });
   };
 
   var saveEdit = function(name) {
-    editNb++;
-    localStorage.editNb = editNb;
-    localStorage["text" + editNb] = $("#text textarea").val();
+    store.incrEditNb();
+    store.setEditText($("#text textarea").val());
     // add date and hour to name of edit
     var date = new Date();
     // French date
     var localeDate = date.toLocaleString();
     localeDate = localeDate.substring(0, localeDate.length - 3);
     localeDate = localeDate.replace(" ", " à ").replace(":", "h");
-    localStorage["editName" + editNb] = name + " (le " + localeDate + ")";
+    store.setEditName(name + " (le " + localeDate + ")");
   };
 
   // Show initial text
   var showText = function() {
-    text.html("<textarea>" + (localStorage.text || initialInfo) + "</textarea>");
+    text.html("<textarea>" + store.getText() + "</textarea>");
   };
   showText();
 
   var saveText = function() {
-    localStorage.text = $("#text textarea").val();
+    store.setText($("#text textarea").val());
   }
 
   // Show initial edits
-  for (var i = 1; i <= editNb; i++) {
+  for (var i = 1; i <= store.getEditNb(); i++) {
     showEdit(i);
   }
 
@@ -75,7 +132,7 @@ $(document).ready(function() {
   $("#propose").click(function() {
     var name = prompt("Donne un nom à la proposition de modification :");
     if (name === "clear") {
-      localStorage.clear();
+      store.clear();
       location.reload(true);
     }
     else if (name === "edit") {
@@ -83,7 +140,7 @@ $(document).ready(function() {
     }
     else {
       saveEdit(name);
-      showEdit(editNb);
+      showEdit(store.getEditNb());
       showText();
     }
   });
