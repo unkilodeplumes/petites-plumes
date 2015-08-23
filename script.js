@@ -27,17 +27,11 @@ var store = function() {
     return localStorage["text(" + versionNb + ")"] || initialInfo;
   };
 
-  var incrEditNb = function() {
+  var addEdit = function(name, text) {
     editNb = getEditNb() + 1;
     localStorage["editNb(" + versionNb + ")"] = editNb;
-  };
-
-  var setEditText = function(value) {
-    localStorage["editText(" + versionNb + "," + getEditNb() + ")"] = value;
-  };
-
-  var setEditName = function(value) {
-    localStorage["editName(" + versionNb + "," + getEditNb() + ")"] = value;
+    localStorage["editText(" + versionNb + "," + getEditNb() + ")"] = text;
+    localStorage["editName(" + versionNb + "," + getEditNb() + ")"] = name;
   };
 
   var setText = function(value) {
@@ -57,9 +51,7 @@ var store = function() {
     getEditName: getEditName,
     getEditText: getEditText,
     getText: getText,
-    incrEditNb: incrEditNb,
-    setEditText: setEditText,
-    setEditName: setEditName,
+    addEdit: addEdit,
     setText: setText,
     clear: clear
   };
@@ -104,15 +96,13 @@ $(document).ready(function() {
   };
 
   var saveEdit = function(name) {
-    store.incrEditNb();
-    store.setEditText($("#text textarea").val());
-    // add date and hour to name of edit
+    // add date and hour to edit name
     var date = new Date();
     // French date
     var localeDate = date.toLocaleString();
     localeDate = localeDate.substring(0, localeDate.length - 3);
     localeDate = localeDate.replace(" ", " à ").replace(":", "h");
-    store.setEditName(name + " (le " + localeDate + ")");
+    store.addEdit(name + " (le " + localeDate + ")", $("#text textarea").val());
   };
 
   // Show initial text
