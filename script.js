@@ -131,7 +131,10 @@ $(document).ready(function() {
   // New edits are made possible
   $("#propose").click(function() {
     var name = prompt("Donne un nom à la proposition de modification :");
-    if (name === "clear") {
+    if (name === null || name === "") {
+      alert("La modification n'a pas été sauvegardée.")
+    }
+    else if (name === "clear") {
       store.clear();
       location.reload(true);
     }
