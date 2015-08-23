@@ -5,13 +5,10 @@
 var store = function() {
   // local attributes
   var versionNb = localStorage.versionNb || 0;
-  var editNb = null;
+  var editNb = localStorage["editNb(" + versionNb + ")"] || 0;
   var initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
 
   var getEditNb = function() {
-    if (editNb === null) {
-      editNb = localStorage["editNb(" + versionNb + ")"] || 0;
-    };
     return editNb;
   };
 
@@ -28,10 +25,10 @@ var store = function() {
   };
 
   var addEdit = function(name, text) {
-    editNb = getEditNb() + 1;
+    editNb++;
     localStorage["editNb(" + versionNb + ")"] = editNb;
-    localStorage["editText(" + versionNb + "," + getEditNb() + ")"] = text;
-    localStorage["editName(" + versionNb + "," + getEditNb() + ")"] = name;
+    localStorage["editText(" + versionNb + "," + editNb + ")"] = text;
+    localStorage["editName(" + versionNb + "," + editNb + ")"] = name;
   };
 
   var setText = function(value) {
