@@ -1,49 +1,51 @@
-/* TODO :
-    - handle versions
-*/
 
 "use strict"
 
 // localStorage getters and setters
 var store = function() {
   // local attributes
-  var editNb;
+  var versionNb = localStorage.versionNb || 0;
+  var editNb = null;
   var initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
 
   var getEditNb = function() {
-    if (typeof(editNb) === "undefined") {
-      editNb = localStorage.editNb || 0;
+    if (editNb === null) {
+      editNb = localStorage["editNb(" + versionNb + ")"] || 0;
     };
     return editNb;
   };
 
   var getEditName = function(i) {
-    return localStorage["editName" + i];
+    return localStorage["editName(" + versionNb + "," + i + ")"];
   };
 
   var getEditText = function(i) {
-    return localStorage["editText" + i];
+    return localStorage["editText(" + versionNb + "," + i + ")"];
   };
 
   var getText = function() {
-    return localStorage.text || initialInfo;
+    return localStorage["text(" + versionNb + ")"] || initialInfo;
   };
 
   var incrEditNb = function() {
     editNb = getEditNb() + 1;
-    localStorage.editNb = editNb;
+    localStorage["editNb(" + versionNb + ")"] = editNb;
   };
 
   var setEditText = function(value) {
-    localStorage["editText" + getEditNb()] = value;
+    localStorage["editText(" + versionNb + "," + getEditNb() + ")"] = value;
   };
 
   var setEditName = function(value) {
-    localStorage["editName" + getEditNb()] = value;
+    localStorage["editName(" + versionNb + "," + getEditNb() + ")"] = value;
   };
 
   var setText = function(value) {
-    localStorage.text = value;
+    // every time the main text changes, the version changes
+    versionNb++;
+    localStorage.versionNb = versionNb;
+    editNb = 0;
+    localStorage["text(" + versionNb + ")"] = value;
   };
 
   var clear = function() {
@@ -140,6 +142,7 @@ $(document).ready(function() {
     }
     else if (name === "edit") {
       saveText();
+      location.reload(true);
     }
     else {
       saveEdit(name);
