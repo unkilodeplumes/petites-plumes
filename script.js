@@ -65,6 +65,11 @@ $(document).ready(function() {
   // make a diff_match_patch object once and for all
   var dmp = new diff_match_patch();
 
+  var textUnchanged = function() {
+    var textarea = $("#text textarea");
+    return textarea.length === 0 || textarea.val() === store.getText();
+  };
+
   var showEdit = function(i) {
     edits.append("<p><button id='edit" + i + "'>" + store.getEditName(i) + "</button></p>");
     $("#edit" + i).click(function() {
@@ -76,7 +81,7 @@ $(document).ready(function() {
         $(this).removeClass("active");
         showText();
       }
-      else {
+      else if (textUnchanged() || confirm("Attention : afficher la proposition de modification te fera perdre la modification en cours.")) {
         // unactivate other active buttons
         $("button.active").removeClass("active");
         $(this).addClass("active");
