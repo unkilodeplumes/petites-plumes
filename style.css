@@ -22,6 +22,7 @@ body {
   background-color: #eee;
   font-family: cursive;
   font-size: 16px;
+  overflow: scroll;
 }
 
 #edits {
@@ -32,6 +33,7 @@ body {
   background-color: #ddd;
   border: solid #eee;
   font-family: monospace;
+  overflow: scroll;
 }
 
 #edits button {
