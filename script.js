@@ -39,6 +39,20 @@ var store = function() {
     localStorage["text(" + versionNb + ")"] = value;
   };
 
+  var setPassword = function(value) {
+    localStorage.password = CryptoJS.MD5(value);
+  };
+
+  var checkPassword = function(value) {
+    // stored value is a string and hashed value is an object
+    // thus we need to check equality modulo conversion
+    return localStorage.password == CryptoJS.MD5(value);
+  };
+
+  var noPassword = function() {
+    return typeof(localStorage.password) === "undefined";
+  }
+
   var clear = function() {
     localStorage.clear();
   };
@@ -50,9 +64,28 @@ var store = function() {
     getText: getText,
     addEdit: addEdit,
     setText: setText,
+    setPassword: setPassword,
+    checkPassword: checkPassword,
+    noPassword: noPassword,
     clear: clear
   };
 }();
+
+var passwordOk = function(toSet) {
+  if (store.noPassword()) {
+    if (toSet) {
+      store.setPassword(prompt("Choisissez un mot de passe :"));
+    }
+    return true;
+  }
+  else {
+    var ok = store.checkPassword(prompt("Entrez le mot de passe :"));
+    if (!ok) {
+      alert("Mot de passe incorrect !");
+    }
+    return ok;
+  }
+}
 
 $(document).ready(function() {
 
@@ -129,12 +162,16 @@ $(document).ready(function() {
       alert("La modification n'a pas été sauvegardée.")
     }
     else if (name === "clear") {
-      store.clear();
-      location.reload(true);
+      if (passwordOk(false)) {
+        store.clear();
+        location.reload(true);
+      }
     }
     else if (name === "edit") {
-      saveText();
-      location.reload(true);
+      if (passwordOk(true)) {
+        saveText();
+        location.reload(true);
+      }
     }
     else {
       saveEdit(name);
