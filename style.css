@@ -49,3 +49,11 @@ body {
 button.active {
   border-style: inset;
 }
+
+ins {
+  background-color: rgb(213,255,213);
+}
+
+del {
+   background-color: #ffe6e6;
+}
