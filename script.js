@@ -1,3 +1,6 @@
+/* Copyright 2015 Jules and Theo Zimmermann
+   All rights reserved
+**/
 
 "use strict"
 
