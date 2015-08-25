@@ -9,7 +9,7 @@ var store = function() {
   // local attributes
   var versionNb = localStorage.versionNb || 0;
   var editNb = localStorage["editNb(" + versionNb + ")"] || 0;
-  const initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
+  const initialInfo = 'Espace à remplir par un texte initial.\n\nPour sauvegarder un nouveau texte, cliquer sur "Proposer la modification" puis entrer "edit".\nLa première fois, il faudra choisir un mot de passe qui sera demandé les fois suivantes.'
 
   var getEditNb = function() {
     return editNb;
@@ -77,9 +77,11 @@ var store = function() {
   };
 }();
 
-var alert = function(message) {
-  $("<p>" + message + "</p>").dialog({
+var alert = function(message, width) {
+  width = width ? width : 300;
+  $("<div>" + message + "</div>").dialog({
     resizable: false,
+    width: width,
     modal: true,
     buttons: {
       Ok: function() {
@@ -90,7 +92,7 @@ var alert = function(message) {
 };
 
 var confirm = function(message, callback) {
-  $("<p>" + message + "</p>").dialog({
+  $("<div>" + message + "</div>").dialog({
     resizable: false,
     modal: true,
     buttons: {
@@ -107,7 +109,7 @@ var confirm = function(message, callback) {
 
 var prompt = function(message, callback, password) {
   var type = password ? "password" : "text";
-  var dialog = $('<div><label for="prompt">' + message + '</label><br><input id="prompt" type="' + type + '" autocomplete="off"></div>').dialog({
+  var dialog = $('<div><p><label for="prompt">' + message + '</label><p><input id="prompt" type="' + type + '" autocomplete="off"></div>').dialog({
     autoOpen: false,
     resizable: false,
     modal: true,
@@ -136,9 +138,9 @@ var prompt = function(message, callback, password) {
 var passwordOk = function(toSet, callback) {
   if (store.noPassword()) {
     if (toSet) {
-      prompt("Choisissez un mot de passe :", function(value) {
+      prompt("Choisir un mot de passe :", function(value) {
         if (value === null) {
-          alert("Opération annulée !");
+          alert("<p>Opération annulée !");
         }
         else {
           store.setPassword(value);
@@ -151,12 +153,12 @@ var passwordOk = function(toSet, callback) {
     }
   }
   else {
-    prompt("Entrez le mot de passe :", function(password) {
+    prompt("Mot de passe ?", function(password) {
       if (store.checkPassword(password)) {
         callback();
       }
       else {
-        alert("Mot de passe incorrect !");
+        alert("<p>Mot de passe incorrect !");
       }
     }, true);
   }
@@ -209,7 +211,7 @@ $(document).ready(function() {
         activate();
       }
       else {
-        confirm("Attention : afficher la proposition de modification te fera perdre la modification en cours.", activate);
+        confirm("<p>Attention : afficher la proposition de modification annulera la modification en cours.", activate);
       }
     });
   };
@@ -242,14 +244,14 @@ $(document).ready(function() {
   // New edits are made possible
   $("#propose").click(function() {
     if (textUnchanged()) {
-      alert("Pas de modification en cours !");
+      alert("<p>Pas de modification en cours !");
       return;
     }
-    prompt("Donne un nom à la proposition de modification :", function(name) {
-      if (name === null || name === "") {
-        alert("La modification n'a pas été sauvegardée.")
+    prompt("Description de la proposition de modification :", function(name) {
+      if (name === null || name === "" || name === "reset" && $("textarea").val() !== "" || name === "edit" && $("textarea").val() === "") {
+        alert("<p>La modification n'a pas été sauvegardée.")
       }
-      else if (name === "clear") {
+      else if (name === "reset") {
         passwordOk(false, function() {
           store.clear();
           showText();
@@ -269,6 +271,22 @@ $(document).ready(function() {
         showText();
       }
     });
+  });
+
+  // Menu
+  $("#help").click(function(e) {
+    e.preventDefault();
+    alert("<h2>Pour les élèves :</h2><p>Le texte principal est modifiable. On sauvegarde les changements en cliquant sur \"Proposer la modification\" et en lui donnant un nom.<p>Toutes les propositions de modification sont listées dans la colonne de droite. Un clic permet de les afficher, un autre clic de revenir au texte non modifié. Le texte n'est pas modifiable lors de l'affichage d'une proposition modification.<h2>Pour les profs :</h2><p>Les opérations suivantes sont protégées par un mot de passe.<p>Pour sauvegarder une nouvelle version du texte, il faut cliquer sur \"Proposer la modification\" puis entrer \"edit\".<p>Pour remettre l'outil à zéro (attention danger !), il faut supprimer le texte, cliquer sur \"Proposer la modification\" puis entrer \"reset\".", 500);
+  });
+
+  $("#about").click(function(e) {
+    e.preventDefault();
+    alert("<p>Les Petites Plumes est un site réalisé pour les élèves du Vallon de l'Oriol par Jules et Théo Zimmermann.<p>C'est un outil simplifié, issu d'<a target=\"_blank\" href=\"http://unkilodeplumes.fr\">unkilodeplumes</a>, le roman collaboratif.");
+  });
+
+  $("#contact").click(function(e) {
+    e.preventDefault();
+    alert("<p>Nous sommes ouverts à toutes les remarques, questions, etc. Notre adresse e-mail:<p><a href=\"mailto:contact@unkilodeplumes.fr\">contact@unkilodeplumes.fr</a>.");
   });
 
 });

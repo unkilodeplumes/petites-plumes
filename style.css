@@ -2,19 +2,57 @@
    All rights reserved
 **/
 
-html {
-  height: 95%;
-  margin: auto;
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  height: calc(100% - 20px);
+  background-color: #eee;
+}
+
+header {
+  height: 8%;
+  background-color: rgb(213,255,213);
+  font-family: cursive;
+}
+
+header h1 {
+  display: inline;
+  margin-left: 1%;
+  font-size: 20px;
+}
+
+header h2 {
+  display: inline;
+  margin-left: 1%;
+  font-size: 15px;
+}
+
+header a {
+  text-decoration: none;
+  color: black;
+}
+
+header .menu {
+  float: right;
+  margin-left: 10%;
+  margin-right: 2%;
+  margin-top: 1%;
+  font-size: 20px;
+  color: #bbb;
+}
+
+header .menu:hover {
+  color: black;
 }
 
 #text {
   float: left;
-  width: calc(57% - 20px);
-  height: inherit;
+  width: 56%;
+  margin: 1%;
+  height: 84%;
 }
 
 #text > textarea, #text > p {
@@ -23,7 +61,7 @@ body {
   padding: 10px;
   width: 100%;
   height: 100%;
-  background-color: #eee;
+  background-color: white;
   font-family: cursive;
   font-size: 16px;
   overflow: scroll;
@@ -36,12 +74,12 @@ body {
 
 #edits {
   float: right;
-  width: calc(39% - 20px);
-  height: inherit;
+  width: 36%;
+  margin: 1%;
+  height: 84%;
   padding: 10px;
-  background-color: #ddd;
   border: solid #eee;
-  font-family: monospace;
+  background-color: white;
   overflow: scroll;
 }
 
