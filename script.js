@@ -6,7 +6,7 @@ var store = function() {
   // local attributes
   var versionNb = localStorage.versionNb || 0;
   var editNb = localStorage["editNb(" + versionNb + ")"] || 0;
-  var initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
+  const initialInfo = 'Instructions de démarrage rapide :\n\nRemplacez ces instructions par un texte initial puis cliquez sur "Proposer la modification" et renseignez le nom "edit" (vous pourrez modifier le texte principal dans le futur de la même façon).\n\nTout le monde peut faire des propositions de modification qui s\'affichent sur le côté.\n\nPour revenir à l\'état initial, cliquez sur "Proposer la modification" et renseignez "clear".'
 
   var getEditNb = function() {
     return editNb;
@@ -21,7 +21,8 @@ var store = function() {
   };
 
   var getText = function() {
-    return localStorage["text(" + versionNb + ")"] || initialInfo;
+    var inStore = localStorage["text(" + versionNb + ")"];
+    return (typeof(inStore) === "undefined") ? initialInfo : inStore;
   };
 
   var addEdit = function(name, text) {
@@ -55,6 +56,8 @@ var store = function() {
 
   var clear = function() {
     localStorage.clear();
+    versionNb = 0;
+    editNb = 0;
   };
 
   return {
@@ -71,19 +74,88 @@ var store = function() {
   };
 }();
 
-var passwordOk = function(toSet) {
+var alert = function(message) {
+  $("<p>" + message + "</p>").dialog({
+    resizable: false,
+    modal: true,
+    buttons: {
+      Ok: function() {
+        $(this).remove();
+      }
+    }
+  });
+};
+
+var confirm = function(message, callback) {
+  $("<p>" + message + "</p>").dialog({
+    resizable: false,
+    modal: true,
+    buttons: {
+      Continuer: function() {
+        $(this).remove();
+        callback();
+      },
+      Annuler: function() {
+        $(this).remove();
+      }
+    }
+  });
+};
+
+var prompt = function(message, callback, password = false) {
+  var type = password ? "password" : "text";
+  var dialog = $('<div><label for="prompt">' + message + '</label><br><input id="prompt" type="' + type + '" autocomplete="off"></div>').dialog({
+    autoOpen: false,
+    resizable: false,
+    modal: true,
+    buttons: {
+      Continuer: function() {
+        var value = $("#prompt").val();
+        $(this).remove();
+        callback(value);
+      },
+      Annuler: function() {
+        $(this).remove();
+        callback(null);
+      }
+    }
+  });
+  $("#prompt").keypress(function(e) {
+    if (e.which === 13) {
+      var value = $("#prompt").val();
+      dialog.remove();
+      callback(value);
+    }
+  });
+  dialog.dialog("open");
+};
+
+var passwordOk = function(toSet, callback) {
   if (store.noPassword()) {
     if (toSet) {
-      store.setPassword(prompt("Choisissez un mot de passe :"));
+      prompt("Choisissez un mot de passe :", function(value) {
+        if (value === null) {
+          alert("Opération annulée !");
+        }
+        else {
+          store.setPassword(value);
+          callback();
+        }
+      }, true);
     }
-    return true;
+    else {
+      callback();
+    }
   }
   else {
-    var ok = store.checkPassword(prompt("Entrez le mot de passe :"));
-    if (!ok) {
-      alert("Mot de passe incorrect !");
-    }
-    return ok;
+    prompt("Entrez le mot de passe :", function(password) {
+      if (store.checkPassword(password)) {
+        callback();
+      }
+      else {
+        alert("Mot de passe incorrect !");
+      }
+    }, true);
   }
 }
 
@@ -101,7 +173,7 @@ $(document).ready(function() {
   };
 
   var showEdit = function(i) {
-    edits.append("<p><button id='edit" + i + "'>" + store.getEditName(i) + "</button></p>");
+    edits.append('<p><button class="edit" id="edit' + i + '">' + store.getEditName(i) + '</button></p>');
     $("#edit" + i).click(function() {
       // active -> unactive / unactive -> active
 
@@ -110,11 +182,14 @@ $(document).ready(function() {
         // unactivate button
         $(this).removeClass("active");
         showText();
+        return;
       }
-      else if (textUnchanged() || confirm("Attention : afficher la proposition de modification te fera perdre la modification en cours.")) {
+      var that = $(this);
+
+      var activate = function() {
         // unactivate other active buttons
         $("button.active").removeClass("active");
-        $(this).addClass("active");
+        that.addClass("active");
 
         var texti = store.getEditText(i);
         if (typeof(texti) !== "undefined") {
@@ -126,6 +201,12 @@ $(document).ready(function() {
         else {
           text.html("<p>Erreur !</p>");
         }
+      };
+      if (textUnchanged()) {
+        activate();
+      }
+      else {
+        confirm("Attention : afficher la proposition de modification te fera perdre la modification en cours.", activate);
       }
     });
   };
@@ -157,27 +238,34 @@ $(document).ready(function() {
 
   // New edits are made possible
   $("#propose").click(function() {
-    var name = prompt("Donne un nom à la proposition de modification :");
-    if (name === null || name === "") {
-      alert("La modification n'a pas été sauvegardée.")
+    if (textUnchanged()) {
+      alert("Pas de modification en cours !");
+      return;
     }
-    else if (name === "clear") {
-      if (passwordOk(false)) {
-        store.clear();
-        location.reload(true);
+    prompt("Donne un nom à la proposition de modification :", function(name) {
+      if (name === null || name === "") {
+        alert("La modification n'a pas été sauvegardée.")
       }
-    }
-    else if (name === "edit") {
-      if (passwordOk(true)) {
-        saveText();
-        location.reload(true);
+      else if (name === "clear") {
+        passwordOk(false, function() {
+          store.clear();
+          showText();
+          $(".edit").remove();
+        });
       }
-    }
-    else {
-      saveEdit(name);
-      showEdit(store.getEditNb());
-      showText();
-    }
+      else if (name === "edit") {
+        passwordOk(true, function() {
+          saveText();
+          showText();
+          $(".edit").remove();
+        });
+      }
+      else {
+        saveEdit(name);
+        showEdit(store.getEditNb());
+        showText();
+      }
+    });
   });
 
 });
