@@ -154,7 +154,10 @@ var passwordOk = function(toSet, callback) {
   }
   else {
     prompt("Mot de passe ?", function(password) {
-      if (store.checkPassword(password)) {
+      if (password === null) {
+        alert("<p>Opération annulée !");
+      }
+      else if (store.checkPassword(password)) {
         callback();
       }
       else {
