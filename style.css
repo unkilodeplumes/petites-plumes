@@ -25,6 +25,11 @@ body {
   overflow: scroll;
 }
 
+.ui-dialog, .ui-dialog button, #edits {
+  font-family: monospace;
+  font-size: 14px;
+}
+
 #edits {
   float: right;
   width: calc(39% - 20px);
