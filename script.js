@@ -105,7 +105,7 @@ var confirm = function(message, callback) {
   });
 };
 
-var prompt = function(message, callback, password = false) {
+var prompt = function(message, callback, password) {
   var type = password ? "password" : "text";
   var dialog = $('<div><label for="prompt">' + message + '</label><br><input id="prompt" type="' + type + '" autocomplete="off"></div>').dialog({
     autoOpen: false,
