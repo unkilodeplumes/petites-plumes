@@ -67,6 +67,10 @@ header .menu:hover {
   overflow: scroll;
 }
 
+#text > textarea {
+  resize: none;
+}
+
 .ui-dialog, .ui-dialog button, #edits {
   font-family: monospace;
   font-size: 14px;
